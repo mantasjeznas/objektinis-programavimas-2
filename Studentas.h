@@ -64,33 +64,30 @@ public:
     const std::string &pavarde() const { return pavarde_; }
     const Pazymiai &pazymiai() const { return paz_; }
     int egz() const { return egz_; }
-};
 
-template <class Pazymiai>
-double vidurkis(const studentas<Pazymiai> &A){
-    if (A.pazymiai().empty()) return 0;
-    double suma = 0;
-    for (int p : A.pazymiai()){
-        suma += p;
+    double vidurkis() const{
+        if (paz_.empty()) return 0;
+        double suma = 0;
+        for (int p : paz_){
+            suma += p;
+        }
+        return suma / paz_.size();
     }
-    return suma / A.pazymiai().size();
-}
 
-template <class Pazymiai>
-double mediana(const studentas<Pazymiai> &A){
-    if (A.pazymiai().empty()) return 0;
-    std::vector<int> laikinas(A.pazymiai().begin(), A.pazymiai().end());
-    std::sort(laikinas.begin(), laikinas.end());
-    int n = laikinas.size();
-    if (n % 2 == 1) return laikinas[n / 2];
-    return (laikinas[n / 2 - 1] + laikinas[n / 2]) / 2.0;
-}
+    double mediana() const{
+        if (paz_.empty()) return 0;
+        std::vector<int> laikinas(paz_.begin(), paz_.end());
+        std::sort(laikinas.begin(), laikinas.end());
+        int n = laikinas.size();
+        if (n % 2 == 1) return laikinas[n / 2];
+        return (laikinas[n / 2 - 1] + laikinas[n / 2]) / 2.0;
+    }
 
-template <class Pazymiai>
-double galutinis(const studentas<Pazymiai> &A, bool ar_mediana){
-    if (ar_mediana) return 0.4 * mediana(A) + 0.6 * A.egz();
-    return 0.4 * vidurkis(A) + 0.6 * A.egz();
-}
+    double galutinis(bool ar_mediana) const{
+        if (ar_mediana) return 0.4 * mediana() + 0.6 * egz_;
+        return 0.4 * vidurkis() + 0.6 * egz_;
+    }
+};
 
 template <class Pazymiai>
 void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_tipas, int pavardes_ilgis, int vardo_ilgis){
@@ -98,9 +95,9 @@ void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_
         << std::setw(vardo_ilgis) << A.vardas()
         << std::fixed << std::setprecision(2);
 
-    if (balo_tipas == 1) out << galutinis(A, false) << "\n";
-    else if (balo_tipas == 2) out << galutinis(A, true) << "\n";
-    else out << std::setw(18) << galutinis(A, false) << galutinis(A, true) << "\n";
+    if (balo_tipas == 1) out << A.galutinis(false) << "\n";
+    else if (balo_tipas == 2) out << A.galutinis(true) << "\n";
+    else out << std::setw(18) << A.galutinis(false) << A.galutinis(true) << "\n";
 }
 
 template <class Pazymiai>
@@ -117,36 +114,36 @@ bool pagal_varda(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
 
 template <class Pazymiai>
 bool pagal_vidurki_mazejant(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (galutinis(a, false) == galutinis(b, false)) return pagal_pavarde(a, b);
-    return galutinis(a, false) > galutinis(b, false);
+    if (a.galutinis(false) == b.galutinis(false)) return pagal_pavarde(a, b);
+    return a.galutinis(false) > b.galutinis(false);
 }
 
 template <class Pazymiai>
 bool pagal_vidurki_didejant(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (galutinis(a, false) == galutinis(b, false)) return pagal_pavarde(a, b);
-    return galutinis(a, false) < galutinis(b, false);
+    if (a.galutinis(false) == b.galutinis(false)) return pagal_pavarde(a, b);
+    return a.galutinis(false) < b.galutinis(false);
 }
 
 template <class Pazymiai>
 bool pagal_mediana_mazejant(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (galutinis(a, true) == galutinis(b, true)) return pagal_pavarde(a, b);
-    return galutinis(a, true) > galutinis(b, true);
+    if (a.galutinis(true) == b.galutinis(true)) return pagal_pavarde(a, b);
+    return a.galutinis(true) > b.galutinis(true);
 }
 
 template <class Pazymiai>
 bool pagal_mediana_didejant(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (galutinis(a, true) == galutinis(b, true)) return pagal_pavarde(a, b);
-    return galutinis(a, true) < galutinis(b, true);
+    if (a.galutinis(true) == b.galutinis(true)) return pagal_pavarde(a, b);
+    return a.galutinis(true) < b.galutinis(true);
 }
 
 template <class Pazymiai>
 bool kietiakas_vid(const studentas<Pazymiai> &A){
-    return galutinis(A, false) >= 5.0;
+    return A.galutinis(false) >= 5.0;
 }
 
 template <class Pazymiai>
 bool kietiakas_med(const studentas<Pazymiai> &A){
-    return galutinis(A, true) >= 5.0;
+    return A.galutinis(true) >= 5.0;
 }
 
 template <class Pazymiai>
@@ -231,7 +228,7 @@ void strategija1(const Konteineris &grupe, Konteineris &vargsiukai, Konteineris 
     vargsiukai.clear();
     kietiakai.clear();
     for (const auto &S : grupe){
-        if (galutinis(S, ar_mediana) < 5.0) vargsiukai.push_back(S);
+        if (S.galutinis(ar_mediana) < 5.0) vargsiukai.push_back(S);
         else kietiakai.push_back(S);
     }
 }
@@ -241,7 +238,7 @@ void strategija2(Konteineris &grupe, Konteineris &vargsiukai, bool ar_mediana){
     vargsiukai.clear();
     auto it = grupe.begin();
     while (it != grupe.end()){
-        if (galutinis(*it, ar_mediana) < 5.0){
+        if (it->galutinis(ar_mediana) < 5.0){
             vargsiukai.push_back(*it);
             it = grupe.erase(it);
         } else{
@@ -255,7 +252,7 @@ void strategija2(std::vector<studentas<Pazymiai>> &grupe, std::vector<studentas<
     vargsiukai.clear();
     std::size_t i = 0;
     while (i < grupe.size()){
-        if (galutinis(grupe[i], ar_mediana) < 5.0){
+        if (grupe[i].galutinis(ar_mediana) < 5.0){
             vargsiukai.push_back(grupe[i]);
             if (i != grupe.size() - 1){
                 std::swap(grupe[i], grupe.back());
@@ -284,7 +281,7 @@ void strategija3(std::list<studentas<Pazymiai>> &grupe, std::list<studentas<Pazy
     while (it != grupe.end()){
         auto kitas = it;
         ++kitas;
-        if (galutinis(*it, ar_mediana) < 5.0) vargsiukai.splice(vargsiukai.end(), grupe, it);
+        if (it->galutinis(ar_mediana) < 5.0) vargsiukai.splice(vargsiukai.end(), grupe, it);
         it = kitas;
     }
 }
