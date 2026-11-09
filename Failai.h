@@ -86,16 +86,7 @@ bool nuskaityti_faila(const std::string &failo_pav, Konteineris &grupe){
     while (getline(buf, eilute)){
         ss.clear();
         ss.str(eilute);
-        ss >> A.pavarde_ >> A.vardas_;
-
-        A.paz_.clear();
-        int x;
-        while (ss >> x) A.paz_.push_back(x);
-
-        if (A.paz_.empty()) continue;
-        A.egz_ = A.paz_.back();
-        A.paz_.pop_back();
-        grupe.push_back(A);
+        if (A.nuskaityti(ss)) grupe.push_back(A);
     }
     return true;
 }

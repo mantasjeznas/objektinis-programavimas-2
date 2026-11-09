@@ -24,6 +24,10 @@ public:
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
         : vardas_(v), pavarde_(p), paz_(pz), egz_(e) {}
 
+    studentas(std::istream &is) : egz_(0) {
+        nuskaityti(is);
+    }
+
     studentas(const studentas &kitas)
         : vardas_(kitas.vardas_), pavarde_(kitas.pavarde_), paz_(kitas.paz_), egz_(kitas.egz_) {}
 
@@ -86,6 +90,17 @@ public:
     double galutinis(bool ar_mediana) const{
         if (ar_mediana) return 0.4 * mediana() + 0.6 * egz_;
         return 0.4 * vidurkis() + 0.6 * egz_;
+    }
+
+    bool nuskaityti(std::istream &is){
+        is >> pavarde_ >> vardas_;
+        paz_.clear();
+        int x;
+        while (is >> x) paz_.push_back(x);
+        if (paz_.empty()) return false;
+        egz_ = paz_.back();
+        paz_.pop_back();
+        return true;
     }
 };
 
