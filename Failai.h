@@ -49,8 +49,8 @@ void rezultatu_isvedimas(std::ostream &out, Konteineris &grupe, int balo_tipas, 
     int pavardes_ilgis = 12;
     int vardo_ilgis = 12;
     for (const auto &S : grupe){
-        int pav_ilgis = S.pavarde.size() + 2;
-        int var_ilgis = S.vardas.size() + 2;
+        int pav_ilgis = S.pavarde().size() + 2;
+        int var_ilgis = S.vardas().size() + 2;
         if (pav_ilgis > pavardes_ilgis) pavardes_ilgis = pav_ilgis;
         if (var_ilgis > vardo_ilgis) vardo_ilgis = var_ilgis;
     }
@@ -86,15 +86,15 @@ bool nuskaityti_faila(const std::string &failo_pav, Konteineris &grupe){
     while (getline(buf, eilute)){
         ss.clear();
         ss.str(eilute);
-        ss >> A.pavarde >> A.vardas;
+        ss >> A.pavarde_ >> A.vardas_;
 
-        A.paz.clear();
+        A.paz_.clear();
         int x;
-        while (ss >> x) A.paz.push_back(x);
+        while (ss >> x) A.paz_.push_back(x);
 
-        if (A.paz.empty()) continue;
-        A.egz = A.paz.back();
-        A.paz.pop_back();
+        if (A.paz_.empty()) continue;
+        A.egz_ = A.paz_.back();
+        A.paz_.pop_back();
         grupe.push_back(A);
     }
     return true;

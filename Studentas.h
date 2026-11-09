@@ -15,66 +15,71 @@
 template <class Pazymiai>
 class studentas {
 public:
-    std::string vardas, pavarde;
-    Pazymiai paz;
-    int egz;
+    std::string vardas_, pavarde_;
+    Pazymiai paz_;
+    int egz_;
 
-    studentas() : egz(0) {}
+    studentas() : egz_(0) {}
 
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
-        : vardas(v), pavarde(p), paz(pz), egz(e) {}
+        : vardas_(v), pavarde_(p), paz_(pz), egz_(e) {}
 
     studentas(const studentas &kitas)
-        : vardas(kitas.vardas), pavarde(kitas.pavarde), paz(kitas.paz), egz(kitas.egz) {}
+        : vardas_(kitas.vardas_), pavarde_(kitas.pavarde_), paz_(kitas.paz_), egz_(kitas.egz_) {}
 
     studentas(studentas &&kitas) noexcept
-        : vardas(std::move(kitas.vardas)), pavarde(std::move(kitas.pavarde)), paz(std::move(kitas.paz)), egz(kitas.egz) {
-        kitas.egz = 0;
+        : vardas_(std::move(kitas.vardas_)), pavarde_(std::move(kitas.pavarde_)), paz_(std::move(kitas.paz_)), egz_(kitas.egz_) {
+        kitas.egz_ = 0;
     }
 
     studentas &operator=(const studentas &kitas){
         if (this != &kitas){
-            vardas = kitas.vardas;
-            pavarde = kitas.pavarde;
-            paz = kitas.paz;
-            egz = kitas.egz;
+            vardas_ = kitas.vardas_;
+            pavarde_ = kitas.pavarde_;
+            paz_ = kitas.paz_;
+            egz_ = kitas.egz_;
         }
         return *this;
     }
 
     studentas &operator=(studentas &&kitas) noexcept{
         if (this != &kitas){
-            vardas = std::move(kitas.vardas);
-            pavarde = std::move(kitas.pavarde);
-            paz = std::move(kitas.paz);
-            egz = kitas.egz;
-            kitas.egz = 0;
+            vardas_ = std::move(kitas.vardas_);
+            pavarde_ = std::move(kitas.pavarde_);
+            paz_ = std::move(kitas.paz_);
+            egz_ = kitas.egz_;
+            kitas.egz_ = 0;
         }
         return *this;
     }
 
     ~studentas(){
-        vardas.clear();
-        pavarde.clear();
-        paz.clear();
-        egz = 0;
+        vardas_.clear();
+        pavarde_.clear();
+        paz_.clear();
+        egz_ = 0;
     }
+
+    const std::string &vardas() const { return vardas_; }
+    const std::string &pavarde() const { return pavarde_; }
+    const Pazymiai &pazymiai() const { return paz_; }
+    int egz() const { return egz_; }
 };
 
 template <class Pazymiai>
 double vidurkis(const studentas<Pazymiai> &A){
-    if (A.paz.empty()) return 0;
+    if (A.pazymiai().empty()) return 0;
     double suma = 0;
-    for (int p : A.paz){
+    for (int p : A.pazymiai()){
         suma += p;
     }
-    return suma / A.paz.size();
+    return suma / A.pazymiai().size();
 }
 
 template <class Pazymiai>
 double mediana(const studentas<Pazymiai> &A){
-    if (A.paz.empty()) return 0;
-    std::vector<int> laikinas(A.paz.begin(), A.paz.end());
+    if (A.pazymiai().empty()) return 0;
+    std::vector<int> laikinas(A.pazymiai().begin(), A.pazymiai().end());
     std::sort(laikinas.begin(), laikinas.end());
     int n = laikinas.size();
     if (n % 2 == 1) return laikinas[n / 2];
@@ -83,14 +88,14 @@ double mediana(const studentas<Pazymiai> &A){
 
 template <class Pazymiai>
 double galutinis(const studentas<Pazymiai> &A, bool ar_mediana){
-    if (ar_mediana) return 0.4 * mediana(A) + 0.6 * A.egz;
-    return 0.4 * vidurkis(A) + 0.6 * A.egz;
+    if (ar_mediana) return 0.4 * mediana(A) + 0.6 * A.egz();
+    return 0.4 * vidurkis(A) + 0.6 * A.egz();
 }
 
 template <class Pazymiai>
 void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_tipas, int pavardes_ilgis, int vardo_ilgis){
-    out << std::left << std::setw(pavardes_ilgis) << A.pavarde
-        << std::setw(vardo_ilgis) << A.vardas
+    out << std::left << std::setw(pavardes_ilgis) << A.pavarde()
+        << std::setw(vardo_ilgis) << A.vardas()
         << std::fixed << std::setprecision(2);
 
     if (balo_tipas == 1) out << galutinis(A, false) << "\n";
@@ -100,14 +105,14 @@ void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_
 
 template <class Pazymiai>
 bool pagal_pavarde(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (a.pavarde == b.pavarde) return a.vardas < b.vardas;
-    return a.pavarde < b.pavarde;
+    if (a.pavarde() == b.pavarde()) return a.vardas() < b.vardas();
+    return a.pavarde() < b.pavarde();
 }
 
 template <class Pazymiai>
 bool pagal_varda(const studentas<Pazymiai> &a, const studentas<Pazymiai> &b){
-    if (a.vardas == b.vardas) return a.pavarde < b.pavarde;
-    return a.vardas < b.vardas;
+    if (a.vardas() == b.vardas()) return a.pavarde() < b.pavarde();
+    return a.vardas() < b.vardas();
 }
 
 template <class Pazymiai>
@@ -148,7 +153,7 @@ template <class Pazymiai>
 studentas<Pazymiai> ivesti_studenta(){
     studentas<Pazymiai> A;
     std::cout<<"Iveskite per tarpa studento varda ir pavarde: ";
-    std::cin>>A.vardas>>A.pavarde;
+    std::cin>>A.vardas_>>A.pavarde_;
     ignoruoti_eilute();
 
     std::cout << "1 - pazymius vesti ranka, 2 - generuoti atsitiktinai: ";
@@ -169,9 +174,9 @@ studentas<Pazymiai> ivesti_studenta(){
             k = skaicius_input();
         }
         for (int i = 0; i < k; i++){
-            A.paz.push_back(random_pazymys());
+            A.paz_.push_back(random_pazymys());
         }
-        A.egz = random_pazymys();
+        A.egz_ = random_pazymys();
         ignoruoti_eilute();
     } else{
         std::string ivedimas;
@@ -189,7 +194,7 @@ studentas<Pazymiai> ivesti_studenta(){
                         std::cout << "Pazymys turi buti nuo 0 iki 10\n";
                         continue;
                     }
-                    A.paz.push_back(paz);
+                    A.paz_.push_back(paz);
                     i++;
                 } catch(const std::exception&){
                     std::cout << "Klaida. Iveskite skaiciu\n";
@@ -209,13 +214,13 @@ studentas<Pazymiai> ivesti_studenta(){
             }
             for (int i = 0; i < k; i++){
                 std::cout << "Iveskite " << i + 1 << " paz: ";
-                A.paz.push_back(pazymio_apribojimas());
+                A.paz_.push_back(pazymio_apribojimas());
             }
             if (k > 0) ignoruoti_eilute();
         }
 
         std::cout<<"Iveskite semestro Egzamino paz.: ";
-        A.egz = pazymio_apribojimas();
+        A.egz_ = pazymio_apribojimas();
         ignoruoti_eilute();
     }
     return A;
