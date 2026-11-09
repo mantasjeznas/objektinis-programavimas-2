@@ -123,7 +123,7 @@ void programa(){
                 cout << "\nKuri skirstymo strategija?\n"
                 << "1 - kopijuoti i du naujus konteinerius\n"
                 << "2 - perkelti vargsiukus ir istrinti is pradinio\n"
-                << "3 - perkelti vargsiukus is karto (vektoriui - stable_partition, o list - splice)\n";
+                << "3 - perkelti vargsiukus is karto (vektoriui - partition, o list - splice)\n";
                 skirstymo_strategija = pasirinkimas_tarp(1, 3);
 
                 skirstymo_mediana = (pagal == 2);

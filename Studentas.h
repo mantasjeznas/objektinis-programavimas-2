@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <stdexcept>
+#include <utility>
 #include "Pagalbiniai.h"
 
 template <class Pazymiai>
@@ -203,11 +204,28 @@ void strategija2(Konteineris &grupe, Konteineris &vargsiukai, bool ar_mediana){
 }
 
 template <class Pazymiai>
+void strategija2(std::vector<studentas<Pazymiai>> &grupe, std::vector<studentas<Pazymiai>> &vargsiukai, bool ar_mediana){
+    vargsiukai.clear();
+    std::size_t i = 0;
+    while (i < grupe.size()){
+        if (galutinis(grupe[i], ar_mediana) < 5.0){
+            vargsiukai.push_back(grupe[i]);
+            if (i != grupe.size() - 1){
+                std::swap(grupe[i], grupe.back());
+            }
+            grupe.pop_back();
+        } else{
+            ++i;
+        }
+    }
+}
+
+template <class Pazymiai>
 void strategija3(std::vector<studentas<Pazymiai>> &grupe, std::vector<studentas<Pazymiai>> &vargsiukai, bool ar_mediana){
     vargsiukai.clear();
     auto it = grupe.end();
-    if (ar_mediana) it = std::stable_partition(grupe.begin(), grupe.end(), kietiakas_med<Pazymiai>);
-    else it = std::stable_partition(grupe.begin(), grupe.end(), kietiakas_vid<Pazymiai>);
+    if (ar_mediana) it = std::partition(grupe.begin(), grupe.end(), kietiakas_med<Pazymiai>);
+    else it = std::partition(grupe.begin(), grupe.end(), kietiakas_vid<Pazymiai>);
     std::copy(it, grupe.end(), std::back_inserter(vargsiukai));
     grupe.erase(it, grupe.end());
 }
