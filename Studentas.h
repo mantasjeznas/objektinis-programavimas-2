@@ -13,10 +13,52 @@
 #include "Pagalbiniai.h"
 
 template <class Pazymiai>
-struct studentas {
+class studentas {
+public:
     std::string vardas, pavarde;
     Pazymiai paz;
     int egz;
+
+    studentas() : egz(0) {}
+
+    studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
+        : vardas(v), pavarde(p), paz(pz), egz(e) {}
+
+    studentas(const studentas &kitas)
+        : vardas(kitas.vardas), pavarde(kitas.pavarde), paz(kitas.paz), egz(kitas.egz) {}
+
+    studentas(studentas &&kitas) noexcept
+        : vardas(std::move(kitas.vardas)), pavarde(std::move(kitas.pavarde)), paz(std::move(kitas.paz)), egz(kitas.egz) {
+        kitas.egz = 0;
+    }
+
+    studentas &operator=(const studentas &kitas){
+        if (this != &kitas){
+            vardas = kitas.vardas;
+            pavarde = kitas.pavarde;
+            paz = kitas.paz;
+            egz = kitas.egz;
+        }
+        return *this;
+    }
+
+    studentas &operator=(studentas &&kitas) noexcept{
+        if (this != &kitas){
+            vardas = std::move(kitas.vardas);
+            pavarde = std::move(kitas.pavarde);
+            paz = std::move(kitas.paz);
+            egz = kitas.egz;
+            kitas.egz = 0;
+        }
+        return *this;
+    }
+
+    ~studentas(){
+        vardas.clear();
+        pavarde.clear();
+        paz.clear();
+        egz = 0;
+    }
 };
 
 template <class Pazymiai>
