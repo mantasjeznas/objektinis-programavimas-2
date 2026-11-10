@@ -177,17 +177,21 @@ public:
             ignoruoti_eilute();
         }
     }
+
+    void isvesti(std::ostream &out, int balo_tipas, int pavardes_ilgis, int vardo_ilgis) const{
+        out << std::left << std::setw(pavardes_ilgis) << pavarde_
+            << std::setw(vardo_ilgis) << vardas_
+            << std::fixed << std::setprecision(2);
+
+        if (balo_tipas == 1) out << galutinis(false) << "\n";
+        else if (balo_tipas == 2) out << galutinis(true) << "\n";
+        else out << std::setw(18) << galutinis(false) << galutinis(true) << "\n";
+    }
 };
 
 template <class Pazymiai>
 void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_tipas, int pavardes_ilgis, int vardo_ilgis){
-    out << std::left << std::setw(pavardes_ilgis) << A.pavarde()
-        << std::setw(vardo_ilgis) << A.vardas()
-        << std::fixed << std::setprecision(2);
-
-    if (balo_tipas == 1) out << A.galutinis(false) << "\n";
-    else if (balo_tipas == 2) out << A.galutinis(true) << "\n";
-    else out << std::setw(18) << A.galutinis(false) << A.galutinis(true) << "\n";
+    A.isvesti(out, balo_tipas, pavardes_ilgis, vardo_ilgis);
 }
 
 template <class Pazymiai>
