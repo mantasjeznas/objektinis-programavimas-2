@@ -14,11 +14,12 @@
 
 template <class Pazymiai>
 class studentas {
-public:
+private:
     std::string vardas_, pavarde_;
     Pazymiai paz_;
     int egz_;
 
+public:
     studentas() : egz_(0) {}
 
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
