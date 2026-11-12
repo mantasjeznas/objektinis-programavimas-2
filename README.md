@@ -219,6 +219,24 @@ Lyginta v1.0 versija su `struct` ir v1.1 versija su `class`. Naudotas `std::vect
 
 **Išvada.** Bendras laikas su klase skiriasi tik 0.6 % (100 000 studentų) ir 1.7 % (1 000 000 studentų), o tai patenka į matavimų paklaidą. Skirstymo +13.1 % atrodo daug, bet tai trumpiausias etapas (apie 0.05 s), todėl net mažas laiko svyravimas duoda didelį procentą. Perėjimas prie klasės programos nesulėtino: getteriai yra trumpos funkcijos, kurias kompiliatorius įterpia tiesiai į kodą, todėl duomenų pasiekimas per juos kainuoja tiek pat, kiek tiesioginis kreipimasis į struktūros laukus.
 
+### Optimizavimo flag'ų (`-O1`, `-O2`, `-O3`) palyginimas
+
+Abi versijos (`struct` ir `class`) sukompiliuotos su `-O1`, `-O2` ir `-O3`. Naudotas `std::vector`, 3 strategija, kiekvienas matavimas kartotas 3 kartus, lentelėje pateikti vidurkiai (bendras laikas). `struct` versija kompiliuota `g++ -std=c++17 -O1 *.cpp -o programa`, o `class` versija `make OPT=-O1` (atitinkamai su `-O2` ir `-O3`).
+
+| versija | flag | exe dydis, B | stud100000.txt, s | stud1000000.txt, s |
+|---|---|---:|---:|---:|
+| `struct` | `-O1` | 107528 | 0.128472 | 1.3573 |
+| `struct` | `-O2` | 124184 | 0.126851 | 1.30143 |
+| `struct` | `-O3` | 124072 | 0.132353 | 1.37839 |
+| `class` | `-O1` | 107912 | 0.132438 | 1.35843 |
+| `class` | `-O2` | 124856 | 0.129048 | 1.39813 |
+| `class` | `-O3` | 124872 | 0.126077 | 1.34971 |
+
+**Išvados.**
+- **Exe dydis:** su `-O1` failas mažiausias (apie 107.5 KB), su `-O2` ir `-O3` apie 15 % didesnis (apie 124 KB), nes kompiliatorius daugiau funkcijų įterpia tiesiai į kodą. `-O2` ir `-O3` dydžiai beveik vienodi. `class` versijos failas tik 0.4–0.6 % didesnis nei `struct`, nes pridėti konstruktoriai ir getteriai.
+- **Greitis:** skirtumai tarp flag'ų maži ir nepastovūs: su 1 000 000 studentų greičiausias `struct` buvo su `-O2` (1.30 s), o `class` su `-O3` (1.35 s), bet visi rezultatai telpa į maždaug 1.30–1.40 s ribas. Tos pačios `-O2` versijos pakartotinis matavimas (žr. lentelę aukščiau) skyrėsi keliais procentais, todėl tokio dydžio skirtumai yra matavimų paklaida.
+- Optimizavimo lygis šiai programai daug įtakos neturi, nes didžiąją laiko dalį užima failo skaitymas ir rašymas (apie 2/3 bendro laiko), o juos labiau riboja diskas ir failų srautai nei kompiliatoriaus optimizacijos. Tarp `struct` ir `class` versijų su visais flag'ais esminio skirtumo nėra.
+
 ## Testavimo sistemos parametrai
 
 - **CPU:** Apple M1 Pro
