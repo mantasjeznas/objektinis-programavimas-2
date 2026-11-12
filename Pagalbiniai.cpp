@@ -2,17 +2,26 @@
 #include <iostream>
 #include <limits>
 #include <cstdlib>
+#include <cstdio>
 using std::cin;
 using std::cout;
 
 int skaicius_input(){
     int sk;
-    while (!(cin >> sk)) {
+    while (true) {
+        if (cin >> sk) {
+            int c = cin.peek();
+            while (c == ' ' || c == '\t' || c == '\r') {
+                cin.get();
+                c = cin.peek();
+            }
+            if (c == '\n' || c == EOF) return sk;
+        } else{
+            cin.clear();
+        }
         cout << "Netinkama ivestis. Iveskite skaiciu: ";
-        cin.clear();
         ignoruoti_eilute();
     }
-    return sk;
 }
 
 int pazymio_apribojimas(){
