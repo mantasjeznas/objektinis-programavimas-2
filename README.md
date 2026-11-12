@@ -190,6 +190,35 @@ Kompiliuota su `-O2` (`make`).
 - **`vector` prieš `list`:** skaitymas, rašymas ir ypač rūšiavimas su `vector` greitesni. Su 10 000 000 studentų ir 1 strategija bendras laikas su `vector` yra 17.2 s, su `list` 33.7 s, o rūšiavimas atitinkamai 6.3 s ir 16.0 s.
 - **Apibendrinant:** greičiausias variantas yra `vector` su 1 arba 3 strategija. Jei svarbi atmintis, geriausia 3 strategija. 2 strategija tinka tik `list` konteineriui.
 
+## v1.1: `struct` pakeista klase
+
+`studentas` iš struktūros (`struct`) pakeistas į klasę (`class`):
+- duomenys (`vardas_`, `pavarde_`, `paz_`, `egz_`) perkelti į `private` dalį;
+- numatytasis konstruktorius (`egz_ = 0`), konstruktorius su parametrais ir konstruktorius iš srauto `studentas(std::istream &)`;
+- kopijavimo ir perkėlimo konstruktoriai, kopijavimo ir perkėlimo priskyrimo operatoriai, destruktorius;
+- `const` getteriai: `vardas()`, `pavarde()`, `pazymiai()`, `egz()`;
+- `vidurkis()`, `mediana()`, `galutinis()`, `nuskaityti()`, `ivesti()` ir `isvesti()` tapo klasės metodais;
+- palyginimo (rikiavimo) funkcijos liko už klasės ribų ir naudoja getterius.
+
+### `struct` ir `class` spartos palyginimas
+
+Lyginta v1.0 versija su `struct` ir v1.1 versija su `class`. Naudotas `std::vector`, 3 strategija, `-O2`, kiekvienas matavimas kartotas 3 kartus, lentelėje pateikti vidurkiai.
+
+| failas | etapas | `struct`, s | `class`, s | skirtumas |
+|---|---|---:|---:|---:|
+| stud100000.txt | skaitymas | 0.0669887 | 0.0667419 | -0.4 % |
+| | skirstymas | 0.00329871 | 0.0033576 | +1.8 % |
+| | rašymas | 0.0214914 | 0.0210205 | -2.2 % |
+| | rūšiavimas | 0.0344833 | 0.0358422 | +3.9 % |
+| | **bendras laikas** | **0.126262** | **0.126962** | **+0.6 %** |
+| stud1000000.txt | skaitymas | 0.593358 | 0.596703 | +0.6 % |
+| | skirstymas | 0.0451883 | 0.0511193 | +13.1 % |
+| | rašymas | 0.256929 | 0.256017 | -0.4 % |
+| | rūšiavimas | 0.422674 | 0.436174 | +3.2 % |
+| | **bendras laikas** | **1.31815** | **1.34001** | **+1.7 %** |
+
+**Išvada.** Bendras laikas su klase skiriasi tik 0.6 % (100 000 studentų) ir 1.7 % (1 000 000 studentų), o tai patenka į matavimų paklaidą. Skirstymo +13.1 % atrodo daug, bet tai trumpiausias etapas (apie 0.05 s), todėl net mažas laiko svyravimas duoda didelį procentą. Perėjimas prie klasės programos nesulėtino: getteriai yra trumpos funkcijos, kurias kompiliatorius įterpia tiesiai į kodą, todėl duomenų pasiekimas per juos kainuoja tiek pat, kiek tiesioginis kreipimasis į struktūros laukus.
+
 ## Testavimo sistemos parametrai
 
 - **CPU:** Apple M1 Pro
