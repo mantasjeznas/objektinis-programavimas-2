@@ -1,5 +1,5 @@
-# objektinis-programavimas
-![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.0-orange)
+# objektinis-programavimas-2
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.1-orange)
 
 VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius balus (pagal vidurkį arba medianą), skirsto juos į **vargšiukus** (galutinis < 5) ir **kietiakus** (galutinis ≥ 5), generuoja didelius testinius failus ir matuoja programos greitį su `std::vector` ir `std::list`.
 
@@ -19,8 +19,8 @@ VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius 
 Reikia: C++17 kompiliatoriaus (`g++` arba `clang++`) ir `make`.
 
 ```bash
-git clone https://github.com/mantasjeznas/objektinis-programavimas.git
-cd objektinis-programavimas
+git clone -b v1.1 https://github.com/mantasjeznas/objektinis-programavimas-2.git
+cd objektinis-programavimas-2
 make
 ./programa
 ```
@@ -67,7 +67,7 @@ Pavarde1    Vardas1        8   9   10  ... 9
 |---|---|
 | `main.cpp` | Konteinerio pasirinkimas ir programos paleidimas |
 | `Meniu.h` | Pagrindinis meniu (`programa()`) |
-| `Studentas.h` | Studento struktūra, galutinio balo skaičiavimas, skirstymo strategijos |
+| `Studentas.h` | Klasė `studentas`, galutinio balo skaičiavimas, skirstymo strategijos |
 | `Failai.h`, `Failai.cpp` | Failų skaitymas, rašymas, generavimas ir greičio analizė |
 | `Pagalbiniai.h`, `Pagalbiniai.cpp` | Įvesties tikrinimas ir pagalbinės funkcijos |
 | `Makefile` | Kompiliavimo taisyklės |
@@ -85,12 +85,12 @@ kur ND yra namų darbų vidurkis arba mediana.
 | Strategija | Kaip veikia | Atmintis | Greitis `vector` | Greitis `list` |
 |---|---|---|---|---|
 | 1 | Studentai kopijuojami į du naujus konteinerius `vargsiukai` ir `kietiakai`, pradinis lieka | Daugiausia (duomenys du kartus) | Greita, O(n) | Greita, O(n) |
-| 2 | Vargšiukai perkeliami į `vargsiukai` ir ištrinami iš pradinio, jame lieka kietiakai | Mažiau | Lėta, O(n²) | Greita, O(n) |
-| 3 | `vector`: `stable_partition`, `copy` ir vienas `erase`. `list`: perkėlimas su `splice` | Mažiausia | Greita | Greita |
+| 2 | Vargšiukai perkeliami į `vargsiukai` ir pašalinami iš pradinio, jame lieka kietiakai. `vector`: sukeičiamas su paskutiniu (`swap`) ir pašalinamas `pop_back`. `list`: `erase` | Mažiau | Greita, O(n) | Greita, O(n) |
+| 3 | `vector`: `partition`, `copy` ir vienas `erase`. `list`: perkėlimas su `splice` | Mažiausia | Greita | Greita |
 
 ## v1.0 greičio rezultatai
 
-Testuota su sugeneruotais failais `stud1000.txt` – `stud10000000.txt`. Kiekvienas matavimas kartotas **3 kartus**, lentelėse pateikti vidurkiai. Failų generavimas į laiką neįtrauktas.
+Testuota su sugeneruotais failais `stud1000.txt` – `stud10000000.txt`. Kiekvienas matavimas kartotas **3 kartus**, lentelėse pateikti vidurkiai. Failų generavimas į laiką neįtrauktas. Matuota su v1.0 kodu: 2 strategija su `erase` (O(n²)), 3 strategija su `stable_partition`. Nuo v1.1 strategijos pakeistos (žr. [Skirstymo strategijos](#skirstymo-strategijos)).
 
 Etapai:
 - **Skaitymas:** failas nuskaitomas į konteinerį
@@ -202,7 +202,7 @@ Kompiliuota su `-O2` (`make`).
 
 ### `struct` ir `class` spartos palyginimas
 
-Lyginta v1.0 versija su `struct` ir v1.1 versija su `class`. Naudotas `std::vector`, 3 strategija, `-O2`, kiekvienas matavimas kartotas 3 kartus, lentelėje pateikti vidurkiai.
+Lyginta `struct` versija (commitas [fc33b24](https://github.com/mantasjeznas/objektinis-programavimas-2/commit/fc33b24)) ir v1.1 versija su `class`. Naudotas `std::vector`, 3 strategija, `-O2`, kiekvienas matavimas kartotas 3 kartus, lentelėje pateikti vidurkiai.
 
 | failas | etapas | `struct`, s | `class`, s | skirtumas |
 |---|---|---:|---:|---:|
@@ -245,14 +245,21 @@ Abi versijos (`struct` ir `class`) sukompiliuotos su `-O1`, `-O2` ir `-O3`. Naud
 
 ## Release'ų istorija
 
-### [v1.0](https://github.com/mantasjeznas/objektinis-programavimas/tree/v1.0)
+### [v1.1](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.1)
+- `struct studentas` pakeistas į klasę su `private` duomenimis, konstruktoriais, destruktoriumi, getteriais ir metodais
+- `vector` 2 strategija: `swap` + `pop_back` vietoj `erase` (O(n) vietoj O(n²)), 3 strategija: `partition` vietoj `stable_partition`
+- `Makefile` papildytas `OPT` kintamuoju (`make OPT=-O1`, `-O2`, `-O3`)
+- Meniu ir skaičių įvestis per `skaicius_input()` atmeta reikšmes su simboliais (pvz. `8s`)
+- `struct` ir `class` spartos palyginimas ir optimizavimo flag'ų tyrimas (žr. [v1.1 skyrių](#v11-struct-pakeista-klase))
+
+### [v1.0](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.0)
 - Skirstymas iškeltas į atskiras funkcijas, pridėtos 3 skirstymo strategijos `vector` ir `list` konteineriams
 - Strategijos pasirinkimas skirstymo meniu ir greičio analizėje
 - Greičio analizėje galima paleisti visas 3 strategijas su tais pačiais failais, rezultatai išvedami lentelėmis
 - Meniu iškeltas į `Meniu.h`, failai pervadinti į `stud*.txt`, kodas supaprastintas
 - Pridėtas `Makefile`
 
-### [v0.3](https://github.com/mantasjeznas/objektinis-programavimas/tree/v0.3)
+### [v0.3](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v0.3)
 - Konteinerio (`vector` / `list`) pasirinkimas programos pradžioje
 - Šablonai (`template`) rikiavimui, išvedimui ir pažymiams
 - Objekto adreso spausdinimas įvedus studentą
@@ -302,18 +309,18 @@ Bendras visų failų laikas 38,1134 s
 
 </details>
 
-### [v0.2](https://github.com/mantasjeznas/objektinis-programavimas/tree/v0.2)
+### [v0.2](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v0.2)
 - Rezultatų išvedimas į failą, atsitiktinių studentų failų generavimas
 - Skirstymas į vargšiukus ir kietiakus, grupių išvedimas į failus
 - Failų reorganizavimas (`.h` / `.cpp`)
 - Greičio (spartos) analizė
 
-### [v0.1](https://github.com/mantasjeznas/objektinis-programavimas/tree/v0.1)
+### [v0.1](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v0.1)
 - Duomenų nuskaitymas iš failo (`kursiokai.txt`), failo pavadinimą galima įvesti ranka
 - Rikiavimas pagal vardą arba pavardę
 - Rezultatų lentelė sulygiuota pagal duomenis
 
-### [v.pradinė](https://github.com/mantasjeznas/objektinis-programavimas/tree/v.pradine)
+### [v.pradinė](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v.pradine)
 - Galutinio balo skaičiavimas pagal vidurkį arba medianą
 - Namų darbų įvedimas, kai pažymių skaičius nežinomas iš anksto
 - Atsitiktinių pažymių generavimas
