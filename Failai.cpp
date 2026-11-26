@@ -19,9 +19,10 @@ void failo_generavimas(int stud_sk, const string &failo_pav){
     std::stringstream buf;
     buf << "Pavarde Vardas ND1 ND2 ND3 ND4 ND5 Egzaminas\n";
     for (int i = 1; i <= stud_sk; i++) {
-        buf << "Pavarde" << i << " Vardas" << i;
-        for (int j = 0; j < 5; j++) buf << ' ' << random_pazymys();
-        buf << ' ' << random_pazymys() << '\n';
+        std::vector<int> paz;
+        for (int j = 0; j < 5; j++) paz.push_back(random_pazymys());
+        studentas<std::vector<int>> s("Vardas" + std::to_string(i), "Pavarde" + std::to_string(i), paz, random_pazymys());
+        buf << s << '\n';
     }
     fr << buf.str();
     fr.close();

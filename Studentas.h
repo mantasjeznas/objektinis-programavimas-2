@@ -222,6 +222,16 @@ public:
 };
 
 template <class Pazymiai>
+std::ostream &operator<<(std::ostream &out, const studentas<Pazymiai> &s){
+    out << s.pavarde() << ' ' << s.vardas();
+    for (int p : s.pazymiai()){
+        out << ' ' << p;
+    }
+    out << ' ' << s.egz();
+    return out;
+}
+
+template <class Pazymiai>
 void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_tipas, int pavardes_ilgis, int vardo_ilgis){
     A.isvesti(out, balo_tipas, pavardes_ilgis, vardo_ilgis);
 }
