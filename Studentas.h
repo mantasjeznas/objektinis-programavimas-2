@@ -20,12 +20,12 @@ private:
     int egz_;
 
 public:
-    studentas() : egz_(0) {}
+    studentas() : vardas_(""), pavarde_(""), paz_(), egz_(0) {}
 
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
         : vardas_(v), pavarde_(p), paz_(pz), egz_(e) {}
 
-    studentas(std::istream &is) : egz_(0) {
+    studentas(std::istream &is) : vardas_(""), pavarde_(""), paz_(), egz_(0) {
         nuskaityti(is);
     }
 
@@ -70,6 +70,8 @@ public:
     const Pazymiai &pazymiai() const { return paz_; }
     int egz() const { return egz_; }
 
+    bool tuscias() const { return vardas_.empty() && pavarde_.empty() && paz_.empty() && egz_ == 0; }
+
     double vidurkis() const{
         if (paz_.empty()) return 0;
         double suma = 0;
@@ -94,11 +96,31 @@ public:
     }
 
     bool nuskaityti(std::istream &is){
-        is >> pavarde_ >> vardas_;
         paz_.clear();
+        egz_ = 0;
+        if (!(is >> pavarde_ >> vardas_)){
+            vardas_ = "";
+            pavarde_ = "";
+            paz_.clear();
+            egz_ = 0;
+            return false;
+        }
         int x;
-        while (is >> x) paz_.push_back(x);
-        if (paz_.empty()) return false;
+        bool blogas = false;
+        while (is >> x){
+            if (x < 0 || x > 10){
+                blogas = true;
+                break;
+            }
+            paz_.push_back(x);
+        }
+        if (blogas || !is.eof() || paz_.empty()){
+            vardas_ = "";
+            pavarde_ = "";
+            paz_.clear();
+            egz_ = 0;
+            return false;
+        }
         egz_ = paz_.back();
         paz_.pop_back();
         return true;
@@ -143,7 +165,12 @@ public:
                     getline(std::cin, ivedimas);
                     if (ivedimas.empty()) break;
                     try{
-                        int paz = std::stoi(ivedimas);
+                        std::size_t pos = 0;
+                        int paz = std::stoi(ivedimas, &pos);
+                        if (ivedimas.find_first_not_of(" \t\r", pos) != std::string::npos){
+                            std::cout << "Klaida. Iveskite skaiciu\n";
+                            continue;
+                        }
                         if (paz < 0 || paz > 10){
                             std::cout << "Pazymys turi buti nuo 0 iki 10\n";
                             continue;
@@ -157,7 +184,11 @@ public:
             } else{
                 int k;
                 try{
-                    k = std::stoi(ivedimas);
+                    std::size_t pos = 0;
+                    k = std::stoi(ivedimas, &pos);
+                    if (ivedimas.find_first_not_of(" \t\r", pos) != std::string::npos){
+                        k = -1;
+                    }
                 } catch (const std::exception&){
                     k = -1;
                 }
@@ -275,17 +306,11 @@ void strategija2(Konteineris &grupe, Konteineris &vargsiukai, bool ar_mediana){
 template <class Pazymiai>
 void strategija2(std::vector<studentas<Pazymiai>> &grupe, std::vector<studentas<Pazymiai>> &vargsiukai, bool ar_mediana){
     vargsiukai.clear();
-    std::size_t i = 0;
-    while (i < grupe.size()){
-        if (grupe[i].galutinis(ar_mediana) < 5.0){
-            vargsiukai.push_back(grupe[i]);
-            if (i != grupe.size() - 1){
-                std::swap(grupe[i], grupe.back());
-            }
-            grupe.pop_back();
-        } else{
-            ++i;
-        }
+    if (ar_mediana) std::sort(grupe.begin(), grupe.end(), pagal_mediana_mazejant<Pazymiai>);
+    else std::sort(grupe.begin(), grupe.end(), pagal_vidurki_mazejant<Pazymiai>);
+    while (!grupe.empty() && grupe.back().galutinis(ar_mediana) < 5.0){
+        vargsiukai.push_back(grupe.back());
+        grupe.pop_back();
     }
 }
 
