@@ -45,7 +45,9 @@ void programa(){
 
             ignoruoti_eilute();
             for (int j=0;j<n;j++){
-                grupe.push_back(ivesti_studenta<Pazymiai>());
+                studentas<Pazymiai> A;
+                cin >> A;
+                grupe.push_back(A);
                 cout << "objekto adresas: " << &grupe.back() << "\n";
                 ar_suskirstyta = false;
             }

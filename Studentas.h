@@ -232,6 +232,17 @@ std::ostream &operator<<(std::ostream &out, const studentas<Pazymiai> &s){
 }
 
 template <class Pazymiai>
+std::istream &operator>>(std::istream &is, studentas<Pazymiai> &s){
+    if (&is == &std::cin){
+        s.ivesti();
+        return is;
+    }
+    if (!s.nuskaityti(is)) is.setstate(std::ios::failbit);
+    else is.clear(std::ios::eofbit);
+    return is;
+}
+
+template <class Pazymiai>
 void isvesti_studenta(std::ostream &out, const studentas<Pazymiai> &A, int balo_tipas, int pavardes_ilgis, int vardo_ilgis){
     A.isvesti(out, balo_tipas, pavardes_ilgis, vardo_ilgis);
 }
