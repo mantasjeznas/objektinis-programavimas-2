@@ -17,6 +17,10 @@ int skaicius_input(){
             }
             if (c == '\n' || c == EOF) return sk;
         } else{
+            if (cin.eof()) {
+                cout << "Ivestis baigta.\n";
+                std::exit(0);
+            }
             cin.clear();
         }
         cout << "Netinkama ivestis. Iveskite skaiciu: ";
