@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "Studentas.h"
 #include "Pagalbiniai.h"
 #include "Failai.h"
@@ -30,6 +31,7 @@ void programa(){
         << "4. Nuskaityti duomenis is failo\n"
         << "5. Failu generavimas\n"
         << "6. Greicio analize\n"
+        << "7. Rule of three demonstracija\n"
         << "0. Iseiti\n"
         << "Pasirinkimas: ";
         meniu_veiksmas = skaicius_input();
@@ -170,6 +172,54 @@ void programa(){
             failu_generavimo_meniu();
         } else if (meniu_veiksmas == 6){
             greicio_analize_meniu<Konteineris, Pazymiai>();
+        }
+        else if (meniu_veiksmas == 7){
+            cout << "\n======= Rule of three demonstracija =======\n";
+
+            cout << "\n1. Pradinis objektas (>> ir <<)\n";
+            std::istringstream iss("Jonaitis Jonas 8 9 10 9");
+            studentas<Pazymiai> a;
+            iss >> a;
+            cout << "a: " << a << "\n";
+
+            cout << "\n2. Kopijavimo konstruktorius\n";
+            studentas<Pazymiai> b(a);
+            cout << "b: " << b << "\n";
+            cout << "adresas a: " << &a << "\n";
+            cout << "adresas b: " << &b << "\n";
+            std::ostringstream oa, ob;
+            oa << a;
+            ob << b;
+            if (&a != &b && oa.str() == ob.str()){
+                cout << "a ir b yra skirtingi objektai su tais paciais duomenimis\n";
+            }
+
+            cout << "\n3. Kopijavimo priskyrimo operatorius (=)\n";
+            studentas<Pazymiai> c;
+            c = a;
+            c = c;
+            cout << "po c = a ir c = c:\n";
+            cout << "c: " << c << "\n";
+            cout << "adresas c: " << &c << "\n";
+            if (&c != &a){
+                cout << "c ir a yra skirtingi objektai\n";
+            }
+
+            cout << "\n4. Destruktorius\n";
+            cout << "objektu skaicius pries bloka: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+            {
+                studentas<Pazymiai> laikinas(a);
+                cout << "objektu skaicius bloke: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+            }
+            cout << "objektu skaicius po bloka: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+
+            cout << "\n5. Isvestis << ir ivestis >> per srauta\n";
+            std::ostringstream oss;
+            oss << a;
+            std::istringstream iss2(oss.str());
+            studentas<Pazymiai> d;
+            iss2 >> d;
+            cout << "d: " << d << "\n";
         }
         else if (meniu_veiksmas != 0){
             cout << "\nTokio pasirinkimo nera!\n";

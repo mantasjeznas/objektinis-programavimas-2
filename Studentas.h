@@ -18,23 +18,26 @@ private:
     std::string vardas_, pavarde_;
     Pazymiai paz_;
     int egz_;
+    inline static int kiekis_ = 0;
 
 public:
-    studentas() : vardas_(""), pavarde_(""), paz_(), egz_(0) {}
+    studentas() : vardas_(""), pavarde_(""), paz_(), egz_(0) { kiekis_++; }
 
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
-        : vardas_(v), pavarde_(p), paz_(pz), egz_(e) {}
+        : vardas_(v), pavarde_(p), paz_(pz), egz_(e) { kiekis_++; }
 
     studentas(std::istream &is) : vardas_(""), pavarde_(""), paz_(), egz_(0) {
         nuskaityti(is);
+        kiekis_++;
     }
 
     studentas(const studentas &kitas)
-        : vardas_(kitas.vardas_), pavarde_(kitas.pavarde_), paz_(kitas.paz_), egz_(kitas.egz_) {}
+        : vardas_(kitas.vardas_), pavarde_(kitas.pavarde_), paz_(kitas.paz_), egz_(kitas.egz_) { kiekis_++; }
 
     studentas(studentas &&kitas) noexcept
         : vardas_(std::move(kitas.vardas_)), pavarde_(std::move(kitas.pavarde_)), paz_(std::move(kitas.paz_)), egz_(kitas.egz_) {
         kitas.egz_ = 0;
+        kiekis_++;
     }
 
     studentas &operator=(const studentas &kitas){
@@ -63,7 +66,10 @@ public:
         pavarde_.clear();
         paz_.clear();
         egz_ = 0;
+        kiekis_--;
     }
+
+    static int objektu_kiekis() { return kiekis_; }
 
     const std::string &vardas() const { return vardas_; }
     const std::string &pavarde() const { return pavarde_; }
