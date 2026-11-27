@@ -211,7 +211,7 @@ void programa(){
                 studentas<Pazymiai> laikinas(a);
                 cout << "objektu skaicius bloke: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
             }
-            cout << "objektu skaicius po bloka: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+            cout << "objektu skaicius po bloko: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
 
             cout << "\n5. Isvestis << ir ivestis >> per srauta\n";
             std::ostringstream oss;

@@ -6,6 +6,8 @@
 #include <vector>
 #include <list>
 #include <fstream>
+#include <cstdio>
+#include <utility>
 #include <sstream>
 #include <iomanip>
 #include <chrono>
@@ -71,22 +73,17 @@ void rezultatu_isvedimas(std::ostream &out, Konteineris &grupe, int balo_tipas, 
 
 template <class Pazymiai, class Konteineris>
 bool nuskaityti_faila(const std::string &failo_pav, Konteineris &grupe){
-    std::ifstream fd(failo_pav);
-    if (!fd) return false;
+    std::ifstream failas(failo_pav);
+    if (!failas) return false;
 
     grupe.clear();
     std::string eilute;
-    std::stringstream buf;
-    buf << fd.rdbuf();
-    fd.close();
-    getline(buf, eilute);
+    std::getline(failas, eilute);
 
-    studentas<Pazymiai> A;
-    std::stringstream ss;
-    while (getline(buf, eilute)){
-        ss.clear();
-        ss.str(eilute);
-        if (ss >> A) grupe.push_back(A);
+    while (failas.peek() != EOF){
+        studentas<Pazymiai> A;
+        if (failas >> A) grupe.push_back(std::move(A));
+        else if (!failas.eof()) failas.clear();
     }
     return true;
 }

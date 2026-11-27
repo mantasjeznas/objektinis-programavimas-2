@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
+#include <sstream>
 #include "Pagalbiniai.h"
 
 template <class Pazymiai>
@@ -102,9 +103,14 @@ public:
     }
 
     bool nuskaityti(std::istream &is){
+        vardas_ = "";
+        pavarde_ = "";
         paz_.clear();
         egz_ = 0;
-        if (!(is >> pavarde_ >> vardas_)){
+        std::string eilute;
+        if (!std::getline(is, eilute)) return false;
+        std::istringstream ss(eilute);
+        if (!(ss >> pavarde_ >> vardas_)){
             vardas_ = "";
             pavarde_ = "";
             paz_.clear();
@@ -113,14 +119,14 @@ public:
         }
         int x;
         bool blogas = false;
-        while (is >> x){
+        while (ss >> x){
             if (x < 0 || x > 10){
                 blogas = true;
                 break;
             }
             paz_.push_back(x);
         }
-        if (blogas || !is.eof() || paz_.empty()){
+        if (blogas || !ss.eof() || paz_.empty()){
             vardas_ = "";
             pavarde_ = "";
             paz_.clear();
@@ -244,7 +250,6 @@ std::istream &operator>>(std::istream &is, studentas<Pazymiai> &s){
         return is;
     }
     if (!s.nuskaityti(is)) is.setstate(std::ios::failbit);
-    else is.clear(std::ios::eofbit);
     return is;
 }
 

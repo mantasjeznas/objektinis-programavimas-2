@@ -1,5 +1,5 @@
 # objektinis-programavimas-2
-![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.1-orange)
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.2-orange)
 
 VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius balus (pagal vidurkį arba medianą), skirsto juos į **vargšiukus** (galutinis < 5) ir **kietiakus** (galutinis ≥ 5), generuoja didelius testinius failus ir matuoja programos greitį su `std::vector` ir `std::list`.
 
@@ -12,14 +12,16 @@ VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius 
 - Skirstymas į vargšiukus ir kietiakus trimis strategijomis;
 - Testinių failų generavimas (1,000 – 10,000,000 studentų);
 - Greičio analizė su viena arba visomis strategijomis;
-- Konteinerio pasirinkimas programos pradžioje: `std::vector` arba `std::list`.
+- Konteinerio pasirinkimas programos pradžioje: `std::vector` arba `std::list`;
+- Perdengti įvesties (`>>`) ir išvesties (`<<`) operatoriai;
+- Rule of three demonstracija (7 meniu punktas).
 
 ## Diegimas ir paleidimas
 
 Reikia: C++17 kompiliatoriaus (`g++` arba `clang++`) ir `make`.
 
 ```bash
-git clone -b v1.1 https://github.com/mantasjeznas/objektinis-programavimas-2.git
+git clone -b v1.2 https://github.com/mantasjeznas/objektinis-programavimas-2.git
 cd objektinis-programavimas-2
 make
 ./programa
@@ -53,6 +55,7 @@ Tada atidaromas pagrindinis meniu:
 | 4 | Nuskaityti duomenis iš failo | Studentų sąrašas nuskaitomas iš nurodyto failo |
 | 5 | Failų generavimas | Sugeneruojami `stud1000.txt` – `stud10000000.txt` |
 | 6 | Greičio analizė | Matuojami skaitymo, skirstymo, rašymo ir rūšiavimo laikai |
+| 7 | Rule of three demonstracija | Kopijavimo konstruktorius, priskyrimo operatorius, destruktorius ir operatoriai `<<` / `>>` |
 | 0 | Išeiti | Uždaryti programą |
 
 Įvesties failo formatas:
@@ -67,7 +70,7 @@ Pavarde1    Vardas1        8   9   10  ... 9
 |---|---|
 | `main.cpp` | Konteinerio pasirinkimas ir programos paleidimas |
 | `Meniu.h` | Pagrindinis meniu (`programa()`) |
-| `Studentas.h` | Klasė `studentas`, galutinio balo skaičiavimas, skirstymo strategijos |
+| `Studentas.h` | Klasė `studentas`, galutinio balo skaičiavimas, operatoriai `<<` / `>>`, skirstymo strategijos |
 | `Failai.h`, `Failai.cpp` | Failų skaitymas, rašymas, generavimas ir greičio analizė |
 | `Pagalbiniai.h`, `Pagalbiniai.cpp` | Įvesties tikrinimas ir pagalbinės funkcijos |
 | `Makefile` | Kompiliavimo taisyklės |
@@ -85,7 +88,7 @@ kur ND yra namų darbų vidurkis arba mediana.
 | Strategija | Kaip veikia | Atmintis | Greitis `vector` | Greitis `list` |
 |---|---|---|---|---|
 | 1 | Studentai kopijuojami į du naujus konteinerius `vargsiukai` ir `kietiakai`, pradinis lieka | Daugiausia (duomenys du kartus) | Greita, O(n) | Greita, O(n) |
-| 2 | Vargšiukai perkeliami į `vargsiukai` ir pašalinami iš pradinio, jame lieka kietiakai. `vector`: sukeičiamas su paskutiniu (`swap`) ir pašalinamas `pop_back`. `list`: `erase` | Mažiau | Greita, O(n) | Greita, O(n) |
+| 2 | Vargšiukai perkeliami į `vargsiukai` ir pašalinami iš pradinio, jame lieka kietiakai. `vector`: rikiuojama mažėjančiai, tada vargšiukai imami iš galo (`push_back(back())` ir `pop_back()`). `list`: `erase` | Mažiau | Greita, O(n log n) | Greita, O(n) |
 | 3 | `vector`: `partition`, `copy` ir vienas `erase`. `list`: perkėlimas su `splice` | Mažiausia | Greita | Greita |
 
 ## v1.0 greičio rezultatai
@@ -237,6 +240,61 @@ Abi versijos (`struct` ir `class`) sukompiliuotos su `-O1`, `-O2` ir `-O3`. Naud
 - **Greitis:** skirtumai tarp flag'ų maži ir nepastovūs: su 1 000 000 studentų greičiausias `struct` buvo su `-O2` (1.30 s), o `class` su `-O3` (1.35 s), bet visi rezultatai telpa į maždaug 1.30–1.40 s ribas. Tos pačios `-O2` versijos pakartotinis matavimas (žr. lentelę aukščiau) skyrėsi keliais procentais, todėl tokio dydžio skirtumai yra matavimų paklaida.
 - Optimizavimo lygis šiai programai daug įtakos neturi, nes didžiąją laiko dalį užima failo skaitymas ir rašymas (apie 2/3 bendro laiko), o juos labiau riboja diskas ir failų srautai nei kompiliatoriaus optimizacijos. Tarp `struct` ir `class` versijų su visais flag'ais esminio skirtumo nėra.
 
+## v1.2: Rule of three ir perdengti operatoriai
+
+### Rule of three metodai
+
+Klasėje įgyvendinti ir 7 meniu punkte demonstruojami šie metodai:
+
+| Metodas | Ką daro |
+|---|---|
+| `studentas(const studentas &)` | Kopijavimo konstruktorius: sukuria naują objektą ir nukopijuoja visus kito objekto laukus |
+| `operator=` | Kopijavimo priskyrimo operatorius: nukopijuoja duomenis į jau egzistuojantį objektą. Priskyrimas sau (`c = c`) ignoruojamas |
+| `~studentas()` | Destruktorius: išvalo vardą, pavardę ir pažymius, egzaminą nustato į 0 ir sumažina objektų skaitliuką |
+| `studentas(studentas &&)` | Perkėlimo konstruktorius: perima kito objekto duomenis be kopijavimo |
+| `operator=(studentas &&)` | Perkėlimo priskyrimo operatorius: perima duomenis į jau egzistuojantį objektą |
+| `objektu_kiekis()` | Statinis metodas: grąžina, kiek `studentas` objektų šiuo metu egzistuoja |
+| `tuscias()` | Patikrina, ar objektas tuščias (nėra vardo, pavardės, pažymių, o egzaminas lygus 0) |
+
+Demonstracijoje matyti, kad kopijuotas objektas turi tuos pačius duomenis, bet kitą adresą, o `objektu_kiekis()` bloke padidėja vienetu ir po bloko vėl sumažėja — tai rodo, kad destruktorius tikrai įvykdytas.
+
+<img src="images/v1.2_rule_of_three.png" alt="Rule of three demonstracija" width="400">
+
+### Perdengti įvesties ir išvesties operatoriai
+
+`>>` ir `<<` veikia visais reikalaujamais atvejais:
+
+| Atvejis | Kaip naudojama | Kur programoje |
+|---|---|---|
+| 1. Įvestis rankiniu būdu | `std::cin >> A`, pasirinkus `1` | 1 meniu punktas, `Meniu.h` |
+| 2. Įvestis automatiniu būdu | `std::cin >> A`, pasirinkus `2` | 1 meniu punktas, `Meniu.h` |
+| 3. Įvestis iš failo | `failas >> A` | `nuskaityti_faila()` faile `Failai.h`, tiesiogiai iš `std::ifstream` |
+| 4. Išvestis į ekraną | `std::cout << s` | Pvz. 7 meniu punkto demonstracijoje, `Meniu.h` |
+| 5. Išvestis į failą | `buf << s << '\n'` | `failo_generavimas()` faile `Failai.cpp` |
+
+**Kaip veikia `operator>>`.** Jei srautas yra `std::cin` (`&is == &std::cin`), kviečiamas `ivesti()`: tas pats operatorius tinka ir rankiniam (pasirinkus `1`), ir automatiniam (pasirinkus `2`) įvedimui. Kitais atvejais kviečiamas `nuskaityti()`, kuris nuskaito vieną eilutę su `getline` ir ją išanalizuoja. Todėl `>>` veikia ir su `std::istringstream`, ir tiesiogiai su `std::ifstream` (`failas >> A`). Jei eilutės nuskaityti nepavyksta, nustatomas `failbit`, objektas išvalomas ir `if (failas >> s)` tampa `false`. Jei pavyksta, `failbit` nenustatomas, todėl `if (failas >> s)` yra `true` (net jei tai paskutinė failo eilutė be naujos eilutės ženklo).
+
+**Kaip veikia `operator<<`.** Tai laisva funkcija, kuri per getterius `pavarde()`, `vardas()`, `pazymiai()` ir `egz()` išveda studentą formatu `Pavarde Vardas ND1 ND2 ... Egz`. `friend` nereikia, nes getterių užtenka, ir klasės duomenys lieka `private`. Operatorius naujos eilutės neprideda, todėl tinka ir išvedimui į ekraną (`std::cout << s`), ir rašymui į failą (`failas << s`).
+
+**Įvestis rankiniu būdu** (`std::cin >> A`, pasirinkus `1`):
+
+<img src="images/v1.2_ivestis_ranka.png" alt="Įvestis rankiniu būdu" width="400">
+<br><br>
+
+**Įvestis automatiniu būdu** (`std::cin >> A`, pasirinkus `2`):
+
+<img src="images/v1.2_ivestis_auto.png" alt="Įvestis automatiniu būdu" width="400">
+
+**Įvestis iš failo** (`failas >> A` funkcijoje `nuskaityti_faila()`, tiesiogiai iš `std::ifstream`):
+
+<p><img src="images/v1.2_ivestis_failas_1.png" alt="Pirma" width="400"></p>
+<p><img src="images/v1.2_ivestis_failas_2.png" alt="Antra" width="400"></p>
+
+**Išvestis į ekraną ir į failą.** `operator<<` naudojamas žalių studento duomenų išvedimui: `std::cout << s` 7 meniu punkto demonstracijoje ir `buf << s << '\n'` generuojant testinius failus. Rezultatų lentelės (tiek į ekraną, tiek į failą) rašomos su `isvesti()`, nes joms reikia sulygiuotų stulpelių ir apskaičiuotų galutinių balų. Failo generavimo pavyzdys:
+
+<p><img src="images/v1.2_isvestis_failas_1.png" alt="Pirma" width="400"></p>
+<p><img src="images/v1.2_isvestis_failas_2.png" alt="Antra" width="400"></p>
+
 ## Testavimo sistemos parametrai
 
 - **CPU:** Apple M1 Pro
@@ -244,6 +302,14 @@ Abi versijos (`struct` ir `class`) sukompiliuotos su `-O1`, `-O2` ir `-O3`. Naud
 - **Disk:** SSD
 
 ## Release'ų istorija
+
+### [v1.2](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.2)
+- Perdengti įvesties (`>>`) ir išvesties (`<<`) operatoriai visiems atvejams: rankinis, automatinis ir failo įvedimas, išvestis į ekraną ir į failą
+- Rule of three metodų demonstracija 7 meniu punkte (kopijavimo konstruktorius, priskyrimas, destruktorius)
+- Objektų skaitliukas `objektu_kiekis()` ir metodas `tuscias()`
+- `vector` 2 strategija pagal dėstytojo pavyzdį (`sort` ir `pop_back`), aiški laukų inicializacija ir griežtesnis įvesties tikrinimas
+- Pasibaigus įvesčiai (EOF) programa tvarkingai išeina
+- Išsamus `README.md` su lentelėmis ir nuotraukomis (žr. [v1.2 skyrių](#v12-rule-of-three-ir-perdengti-operatoriai))
 
 ### [v1.1](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.1)
 - `struct studentas` pakeistas į klasę su `private` duomenimis, konstruktoriais, destruktoriumi, getteriais ir metodais
