@@ -11,40 +11,39 @@
 #include <stdexcept>
 #include <utility>
 #include <sstream>
+#include "Zmogus.h"
 #include "Pagalbiniai.h"
 
 template <class Pazymiai>
-class studentas {
+class studentas : public Zmogus {
 private:
-    std::string vardas_, pavarde_;
     Pazymiai paz_;
     int egz_;
     inline static int kiekis_ = 0;
 
 public:
-    studentas() : vardas_(""), pavarde_(""), paz_(), egz_(0) { kiekis_++; }
+    studentas() : Zmogus(), paz_(), egz_(0) { kiekis_++; }
 
     studentas(const std::string &v, const std::string &p, const Pazymiai &pz, int e)
-        : vardas_(v), pavarde_(p), paz_(pz), egz_(e) { kiekis_++; }
+        : Zmogus(v, p), paz_(pz), egz_(e) { kiekis_++; }
 
-    studentas(std::istream &is) : vardas_(""), pavarde_(""), paz_(), egz_(0) {
+    studentas(std::istream &is) : Zmogus(), paz_(), egz_(0) {
         nuskaityti(is);
         kiekis_++;
     }
 
     studentas(const studentas &kitas)
-        : vardas_(kitas.vardas_), pavarde_(kitas.pavarde_), paz_(kitas.paz_), egz_(kitas.egz_) { kiekis_++; }
+        : Zmogus(kitas), paz_(kitas.paz_), egz_(kitas.egz_) { kiekis_++; }
 
     studentas(studentas &&kitas) noexcept
-        : vardas_(std::move(kitas.vardas_)), pavarde_(std::move(kitas.pavarde_)), paz_(std::move(kitas.paz_)), egz_(kitas.egz_) {
+        : Zmogus(std::move(kitas)), paz_(std::move(kitas.paz_)), egz_(kitas.egz_) {
         kitas.egz_ = 0;
         kiekis_++;
     }
 
     studentas &operator=(const studentas &kitas){
         if (this != &kitas){
-            vardas_ = kitas.vardas_;
-            pavarde_ = kitas.pavarde_;
+            Zmogus::operator=(kitas);
             paz_ = kitas.paz_;
             egz_ = kitas.egz_;
         }
@@ -53,8 +52,7 @@ public:
 
     studentas &operator=(studentas &&kitas) noexcept{
         if (this != &kitas){
-            vardas_ = std::move(kitas.vardas_);
-            pavarde_ = std::move(kitas.pavarde_);
+            Zmogus::operator=(std::move(kitas));
             paz_ = std::move(kitas.paz_);
             egz_ = kitas.egz_;
             kitas.egz_ = 0;
@@ -72,8 +70,6 @@ public:
 
     static int objektu_kiekis() { return kiekis_; }
 
-    const std::string &vardas() const { return vardas_; }
-    const std::string &pavarde() const { return pavarde_; }
     const Pazymiai &pazymiai() const { return paz_; }
     int egz() const { return egz_; }
 
@@ -231,15 +227,19 @@ public:
         else if (balo_tipas == 2) out << galutinis(true) << "\n";
         else out << std::setw(18) << galutinis(false) << galutinis(true) << "\n";
     }
+
+    void spausdinti(std::ostream &out) const override{
+        out << pavarde_ << ' ' << vardas_;
+        for (int p : paz_){
+            out << ' ' << p;
+        }
+        out << ' ' << egz_;
+    }
 };
 
 template <class Pazymiai>
 std::ostream &operator<<(std::ostream &out, const studentas<Pazymiai> &s){
-    out << s.pavarde() << ' ' << s.vardas();
-    for (int p : s.pazymiai()){
-        out << ' ' << p;
-    }
-    out << ' ' << s.egz();
+    s.spausdinti(out);
     return out;
 }
 
@@ -302,13 +302,6 @@ bool kietiakas_vid(const studentas<Pazymiai> &A){
 template <class Pazymiai>
 bool kietiakas_med(const studentas<Pazymiai> &A){
     return A.galutinis(true) >= 5.0;
-}
-
-template <class Pazymiai>
-studentas<Pazymiai> ivesti_studenta(){
-    studentas<Pazymiai> A;
-    A.ivesti();
-    return A;
 }
 
 template <class Konteineris>
