@@ -1,5 +1,5 @@
 # objektinis-programavimas-2
-![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.2-orange)
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue) ![Build](https://img.shields.io/badge/build-Makefile-green) ![Release](https://img.shields.io/badge/release-v1.5-orange)
 
 VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius balus (pagal vidurkį arba medianą), skirsto juos į **vargšiukus** (galutinis < 5) ir **kietiakus** (galutinis ≥ 5), generuoja didelius testinius failus ir matuoja programos greitį su `std::vector` ir `std::list`.
 
@@ -14,14 +14,15 @@ VU objektinio programavimo projektas. Programa skaičiuoja studentų galutinius 
 - Greičio analizė su viena arba visomis strategijomis;
 - Konteinerio pasirinkimas programos pradžioje: `std::vector` arba `std::list`;
 - Perdengti įvesties (`>>`) ir išvesties (`<<`) operatoriai;
-- Rule of three demonstracija (7 meniu punktas).
+- Abstrakti bazinė klasė `Zmogus` ir išvestinė klasė `studentas`;
+- Rule of three, abstrakčios klasės ir polimorfizmo demonstracija (7 meniu punktas).
 
 ## Diegimas ir paleidimas
 
 Reikia: C++17 kompiliatoriaus (`g++` arba `clang++`) ir `make`.
 
 ```bash
-git clone -b v1.2 https://github.com/mantasjeznas/objektinis-programavimas-2.git
+git clone -b v1.5 https://github.com/mantasjeznas/objektinis-programavimas-2.git
 cd objektinis-programavimas-2
 make
 ./programa
@@ -55,7 +56,7 @@ Tada atidaromas pagrindinis meniu:
 | 4 | Nuskaityti duomenis iš failo | Studentų sąrašas nuskaitomas iš nurodyto failo |
 | 5 | Failų generavimas | Sugeneruojami `stud1000.txt` – `stud10000000.txt` |
 | 6 | Greičio analizė | Matuojami skaitymo, skirstymo, rašymo ir rūšiavimo laikai |
-| 7 | Rule of three demonstracija | Kopijavimo konstruktorius, priskyrimo operatorius, destruktorius ir operatoriai `<<` / `>>` |
+| 7 | Rule of three ir `Zmogus` demonstracija | Kopijavimo konstruktorius, priskyrimo operatorius, destruktorius, operatoriai `<<` / `>>`, abstrakti klasė `Zmogus` ir polimorfizmas per `Zmogus*` |
 | 0 | Išeiti | Uždaryti programą |
 
 Įvesties failo formatas:
@@ -70,7 +71,8 @@ Pavarde1    Vardas1        8   9   10  ... 9
 |---|---|
 | `main.cpp` | Konteinerio pasirinkimas ir programos paleidimas |
 | `Meniu.h` | Pagrindinis meniu (`programa()`) |
-| `Studentas.h` | Klasė `studentas`, galutinio balo skaičiavimas, operatoriai `<<` / `>>`, skirstymo strategijos |
+| `Zmogus.h` | Abstrakti bazinė klasė `Zmogus` (vardas, pavardė, grynai virtualus `spausdinti`) |
+| `Studentas.h` | Išvestinė klasė `studentas` (`public Zmogus`), galutinio balo skaičiavimas, operatoriai `<<` / `>>`, skirstymo strategijos |
 | `Failai.h`, `Failai.cpp` | Failų skaitymas, rašymas, generavimas ir greičio analizė |
 | `Pagalbiniai.h`, `Pagalbiniai.cpp` | Įvesties tikrinimas ir pagalbinės funkcijos |
 | `Makefile` | Kompiliavimo taisyklės |
@@ -295,6 +297,64 @@ Demonstracijoje matyti, kad kopijuotas objektas turi tuos pačius duomenis, bet 
 <p><img src="images/v1.2_isvestis_failas_1.png" alt="Pirma" width="400"></p>
 <p><img src="images/v1.2_isvestis_failas_2.png" alt="Antra" width="400"></p>
 
+
+## v1.5: abstrakti klasė `Zmogus`
+
+Vietoj vienos klasės `studentas` sukurta hierarchija: bazinė abstrakti klasė `Zmogus` (`Zmogus.h`) ir išvestinė klasė `studentas` (`Studentas.h`), kuri paveldi `Zmogus`.
+
+### Kodėl `Zmogus` yra abstrakti
+
+`Zmogus` saugo tai, kas bendra žmogui — vardą ir pavardę. Objekto išvedimas į srautą priklauso nuo išvestinės klasės (pvz. studentas turi ir pažymius), todėl metodas `spausdinti(std::ostream &out)` klasėje `Zmogus` yra grynai virtualus (`= 0`). Klasė su bent vienu grynai virtualiu metodu yra abstrakti: objekto `Zmogus z;` sukurti negalima, o išvestinė klasė šį metodą privalo įgyvendinti. Galutinio balo skaičiavimas (`galutinis`) lieka tik `studentas` klasėje, nes žmogus neturi „galutinio balo pagal medianą“. Virtualus destruktorius `virtual ~Zmogus()` užtikrina, kad objektą naikinant per `Zmogus*` rodyklę būtų kviečiamas tikrasis `~studentas()` destruktorius ir objektų skaitliukas sumažėtų.
+
+### Klasių hierarchija
+
+| Klasė | Tipas | Ką saugo | Paveldėjimas |
+|---|---|---|---|
+| `Zmogus` | abstrakti bazinė (`Zmogus.h`) | `vardas_`, `pavarde_` (`protected`) | — |
+| `studentas<Pazymiai>` | išvestinė (`Studentas.h`) | `paz_`, `egz_`, skaitliukas `kiekis_` | `public Zmogus` |
+
+### Paveldėti ir virtualūs metodai
+
+| Metodas | Klasė | Ką daro |
+|---|---|---|
+| `Zmogus()`, `Zmogus(const string &, const string &)` | `Zmogus` | Numatytasis ir parametrų konstruktoriai |
+| `Zmogus(const Zmogus &)`, `operator=` | `Zmogus` | Kopijavimo konstruktorius ir priskyrimo operatorius |
+| `Zmogus(Zmogus &&)`, `operator=(Zmogus &&)` | `Zmogus` | Perkėlimo konstruktorius ir priskyrimo operatorius, kuriuos kviečia `studentas` |
+| `virtual ~Zmogus()` | `Zmogus` | Virtualus destruktorius |
+| `vardas()`, `pavarde()` | `Zmogus` | Getteriai, kuriuos paveldi `studentas` |
+| `spausdinti(ostream &) = 0` | `Zmogus` | Grynai virtualus metodas objektui išvesti į srautą |
+| `spausdinti(ostream &) override` | `studentas` | Išveda `Pavarde Vardas ND1 ... Egz`; `operator<<` kviečia `s.spausdinti(out)` |
+| `galutinis(bool)` | `studentas` | Galutinis balas pagal vidurkį arba medianą |
+| Konstruktoriai, `operator=`, `~studentas()`, `<<`, `>>` | `studentas` | Visas v1.2 funkcionalumas išsaugotas |
+
+### Demonstracija (7 meniu punktas)
+
+7 meniu punkte palikta Rule of three ir operatorių `<<` / `>>` demonstracija, ir papildomai parodoma:
+- kad `Zmogus` yra abstrakti klasė (`std::is_abstract<Zmogus>::value` lygu 1) ir kad `studentas` yra išvestas iš `Zmogus` (`std::is_base_of<Zmogus, studentas>::value` lygu 1);
+- polimorfizmas per bazinės klasės rodyklę: `Zmogus *z = new studentas<Pazymiai>(a);`, tada kviečiami `z->vardas()`, `z->pavarde()`, `z->spausdinti(std::cout)`, o `delete z;` per virtualų destruktorių sumažina `objektu_kiekis()`.
+
+<img src="images/v1.5_demonstracija.png" alt="Rule of three ir Zmogus demonstracija" width="400">
+
+### Kaip patikrinti, kad `Zmogus z;` nesikompiliuoja
+
+Jei programoje parašytume `Zmogus z;`, kompiliatorius išvestų klaidą, nes `Zmogus` turi grynai virtualų metodą `spausdinti`. Tai galima patikrinti atskiru failu, pavyzdžiui `test_abstrakti.cpp`:
+
+```cpp
+#include "Zmogus.h"
+int main() {
+    Zmogus z;
+    return 0;
+}
+```
+
+```bash
+g++ -std=c++17 -fsyntax-only test_abstrakti.cpp
+```
+
+Kompiliatorius praneš, kad negalima sukurti kintamojo `z`, nes `Zmogus` yra abstrakti klasė, ir nurodys neįgyvendintą grynai virtualų metodą `spausdinti`.
+
+<img src="images/v1.5_kompiliavimo_klaida.png" alt="Kompiliavimo klaida kuriant Zmogus objekta" width="400">
+
 ## Testavimo sistemos parametrai
 
 - **CPU:** Apple M1 Pro
@@ -302,6 +362,14 @@ Demonstracijoje matyti, kad kopijuotas objektas turi tuos pačius duomenis, bet 
 - **Disk:** SSD
 
 ## Release'ų istorija
+
+### [v1.5](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.5)
+- Abstrakti bazinė klasė `Zmogus` ir išvestinė klasė `studentas` (`public Zmogus`)
+- `Zmogus` saugo vardą ir pavardę, turi kopijavimo ir perkėlimo operacijas, virtualų destruktorių ir grynai virtualų metodą `spausdinti`
+- `studentas` įgyvendina `spausdinti`, o `operator<<` kviečia `s.spausdinti(out)`; `galutinis` lieka tik `studentas` klasėje
+- 7 meniu punkte rodoma, kad klasė abstrakti (`std::is_abstract`, `std::is_base_of`) ir veikia polimorfizmas per `Zmogus*`
+- Visas v1.2 funkcionalumas (Rule of three, operatoriai `<<` / `>>`, strategijos, failai) išsaugotas
+- Išsamus `README.md` su hierarchijos ir metodų lentelėmis bei nuotraukomis (žr. [v1.5 skyrių](#v15-abstrakti-klasė-zmogus))
 
 ### [v1.2](https://github.com/mantasjeznas/objektinis-programavimas-2/tree/v1.2)
 - Perdengti įvesties (`>>`) ir išvesties (`<<`) operatoriai visiems atvejams: rankinis, automatinis ir failo įvedimas, išvestis į ekraną ir į failą
