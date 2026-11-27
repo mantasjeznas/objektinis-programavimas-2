@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <type_traits>
 #include "Studentas.h"
 #include "Pagalbiniai.h"
 #include "Failai.h"
@@ -31,7 +32,7 @@ void programa(){
         << "4. Nuskaityti duomenis is failo\n"
         << "5. Failu generavimas\n"
         << "6. Greicio analize\n"
-        << "7. Rule of three demonstracija\n"
+        << "7. Rule of three ir Zmogus demonstracija\n"
         << "0. Iseiti\n"
         << "Pasirinkimas: ";
         meniu_veiksmas = skaicius_input();
@@ -174,7 +175,7 @@ void programa(){
             greicio_analize_meniu<Konteineris, Pazymiai>();
         }
         else if (meniu_veiksmas == 7){
-            cout << "\n======= Rule of three demonstracija =======\n";
+            cout << "\n======= Rule of three ir Zmogus demonstracija =======\n";
 
             cout << "\n1. Pradinis objektas (>> ir <<)\n";
             std::istringstream iss("Jonaitis Jonas 8 9 10 9");
@@ -197,8 +198,9 @@ void programa(){
             cout << "\n3. Kopijavimo priskyrimo operatorius (=)\n";
             studentas<Pazymiai> c;
             c = a;
-            c = c;
-            cout << "po c = a ir c = c:\n";
+            studentas<Pazymiai> &ref = c;
+            c = ref;
+            cout << "po c = a ir c = ref (tas pats objektas):\n";
             cout << "c: " << c << "\n";
             cout << "adresas c: " << &c << "\n";
             if (&c != &a){
@@ -220,6 +222,23 @@ void programa(){
             studentas<Pazymiai> d;
             iss2 >> d;
             cout << "d: " << d << "\n";
+
+            cout << "\n6. Abstrakti klase Zmogus\n";
+            cout << "std::is_abstract<Zmogus>::value = " << std::is_abstract<Zmogus>::value << "\n";
+            cout << "std::is_base_of<Zmogus, studentas>::value = " << std::is_base_of<Zmogus, studentas<Pazymiai>>::value << "\n";
+            cout << "Zmogus objekto sukurti negalima, nes klase yra abstrakti\n";
+
+            cout << "\n7. Polimorfizmas per Zmogus*\n";
+            cout << "objektu skaicius pries new: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+            Zmogus *z = new studentas<Pazymiai>(a);
+            cout << "z->vardas(): " << z->vardas() << "\n";
+            cout << "z->pavarde(): " << z->pavarde() << "\n";
+            cout << "z->spausdinti(std::cout): ";
+            z->spausdinti(std::cout);
+            cout << "\n";
+            cout << "objektu skaicius po new: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
+            delete z;
+            cout << "objektu skaicius po delete: " << studentas<Pazymiai>::objektu_kiekis() << "\n";
         }
         else if (meniu_veiksmas != 0){
             cout << "\nTokio pasirinkimo nera!\n";
