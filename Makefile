@@ -1,7 +1,7 @@
 CXX = g++
 OPT ?= -O2
 CXXFLAGS = -std=c++17 $(OPT)
-HEADERS = Studentas.h Pagalbiniai.h Failai.h Meniu.h
+HEADERS = Zmogus.h Studentas.h Pagalbiniai.h Failai.h Meniu.h
 
 programa: main.o Failai.o Pagalbiniai.o
 	$(CXX) $(CXXFLAGS) main.o Failai.o Pagalbiniai.o -o programa
